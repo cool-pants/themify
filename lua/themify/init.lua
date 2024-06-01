@@ -12,12 +12,29 @@ M.reload_config = function()
 	M.themes = M.load_themes()
 end
 
+local exists = function(file)
+	local ok, err, code = os.rename(file, file)
+	if not ok then
+		if code == 13 then
+			-- Permission denied but exists
+			return true
+		end
+	end
+	return ok, err
+end
+
 ---@param opts table
 M.setup = function(opts)
 	M.modDir = opts["modDir"] or os.getenv("HOME") .. "/.config/nvim/lua/theming/"
 	M.themesModPath = opts["themesModPath"] or "theming."
 	M.themesPath = opts["themesPath"] or M.modDir
+	if not exists(M.modDir) then
+		os.execute("mkdir " .. M.modDir)
+	end
 	local filePath = M.modDir .. "current.th"
+	if not exists(filePath) then
+		os.execute("touch " .. filePath)
+	end
 	M.cachePath = opts["cachePath"] or filePath
 	M.current_theme = "blue"
 	M.themes = M.load_themes()
