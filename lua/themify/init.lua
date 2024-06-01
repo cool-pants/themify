@@ -13,14 +13,14 @@ M.reload_config = function()
 end
 
 local exists = function(file)
-	local ok, err, code = os.rename(file, file)
+	local ok, _, code = os.rename(file, file)
 	if not ok then
 		if code == 13 then
 			-- Permission denied but exists
 			return true
 		end
 	end
-	return ok, err
+	return ok
 end
 
 ---@param opts table
@@ -28,18 +28,22 @@ M.setup = function(opts)
 	M.modDir = opts["modDir"] or os.getenv("HOME") .. "/.config/nvim/lua/theming/"
 	M.themesModPath = opts["themesModPath"] or "theming."
 	M.themesPath = opts["themesPath"] or M.modDir
-	if not exists(M.modDir) then
-		os.execute("mkdir " .. M.modDir)
-	end
 	local filePath = M.modDir .. "current.th"
-	if not exists(filePath) then
-		os.execute("touch " .. filePath)
-	end
 	M.cachePath = opts["cachePath"] or filePath
-	M.current_theme = "blue"
+	if not exists(M.cachePath) then
+		log.debug("Creating dirs and files " .. M.cachePath)
+		local dir = vim.split(M.cachePath, "/")
+		dir = vim.list_slice(dir, 0, #dir - 1)
+		local ok, err, code = os.execute("mkdir " .. vim.fn.join(dir, "/"))
+		log.debug(err)
+		log.debug(code)
+		ok, err, code = os.execute("touch " .. M.cachePath)
+		log.debug(err)
+		log.debug(code)
+	end
+	M.current_theme = opts["defaultTheme"] or "habamax"
 	M.themes = M.load_themes()
 	log.debug("all themes\n" .. vim.inspect(M.themes))
-	log.debug("")
 	return M
 end
 
@@ -64,7 +68,7 @@ M.get_current_theme = function()
 		io.input(file)
 		local theme = io.read()
 		if theme == nil or theme == "" then
-			M.set_theme("blue")
+			M.set_theme(M.current_theme)
 			return
 		end
 		M.current_theme = theme
