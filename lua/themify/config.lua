@@ -69,7 +69,7 @@ M.set_theme = function(theme)
 		local ok, _ = pcall(vim.cmd.colorscheme, theme)
 		return ok
 	end
-	return theme_conf.set_theme()
+	return theme_conf.set_theme(theme)
 end
 
 M.handle_theme_on_setup = function()

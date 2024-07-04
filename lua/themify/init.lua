@@ -8,7 +8,6 @@ M.setup = function(user_opts)
 		config.set(user_opts)
 	end
 
-	config.handle_theme_on_setup()
 	-- -- without scheduling, some vim api calls will not return accurate values
 	-- vim.schedule(setup_usercmds)
 end
